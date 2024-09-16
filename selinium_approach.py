@@ -100,7 +100,7 @@ def main():
     else:
         print("Warning: 'Reported' column not found in the DataFrame")
 
-    df.to_csv('nufroc_data.csv', index=True)
+    df.to_csv('nufroc_data.csv')
     print("Data saved to nuforc_data_all_pages_selenium.csv")
 
 
