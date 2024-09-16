@@ -33,15 +33,15 @@ def scrape_page(url):
 
         row_data = {
             'href': href,
-            'Date': clean_text(cells[1].get_text(strip=True)) if num_cells > 1 else "",
-            'City': clean_text(cells[2].get_text(strip=True)) if num_cells > 2 else "",
-            'State': clean_text(cells[3].get_text(strip=True)) if num_cells > 3 else "",
-            'Country': clean_text(cells[4].get_text(strip=True)) if num_cells > 4 else "",
-            'Shape': clean_text(cells[5].get_text(strip=True)) if num_cells > 5 else "",
-            'Summary': clean_text(cells[6].get_text(strip=True)) if num_cells > 6 else "",
-            'Reported': clean_text(cells[7].get_text(strip=True)) if num_cells > 7 else "",
-            'Media': clean_text(cells[8].get_text(strip=True)) if num_cells > 8 else "",
-            'Explanation': clean_text(cells[9].get_text(strip=True)) if num_cells > 9 else ""
+            'Date': clean_text(cells[1].get_text(strip=True)) if num_cells > 1 else "N/A",
+            'City': clean_text(cells[2].get_text(strip=True)) if num_cells > 2 else "N/A",
+            'State': clean_text(cells[3].get_text(strip=True)) if num_cells > 3 else "N/A",
+            'Country': clean_text(cells[4].get_text(strip=True)) if num_cells > 4 else "N/A",
+            'Shape': clean_text(cells[5].get_text(strip=True)) if num_cells > 5 else "N/A",
+            'Summary': clean_text(cells[6].get_text(strip=True)) if num_cells > 6 else "N/A",
+            'Reported': clean_text(cells[7].get_text(strip=True)) if num_cells > 7 else "N/A",
+            'Media': clean_text(cells[8].get_text(strip=True)) if num_cells > 8 else "N/A",
+            'Explanation': clean_text(cells[9].get_text(strip=True)) if num_cells > 9 else "N/A"
         }
 
         # Add the row to data
@@ -104,7 +104,7 @@ def main():
         print("Warning: 'Reported' column not found in the DataFrame")
 
     # Save to CSV
-    df.to_csv('nufroc_data.csv', index=True)
+    df.to_csv('nuforc_data.csv', index=True)
     print("Data saved to nuforc_data_all_pages.csv")
 
 
