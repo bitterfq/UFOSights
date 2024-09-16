@@ -56,31 +56,30 @@ def scrape_page(driver):
 def main():
     url = 'https://nuforc.org/subndx/?id=highlights'
 
-    # Set up the Selenium WebDriver (you'll need to download the appropriate driver for your browser)
-    driver = webdriver.Chrome()  # Or webdriver.Firefox(), etc.
+    driver = webdriver.Chrome()
     driver.get(url)
-
     all_data = []
     page = 1
 
     try:
         while True:
             print(f"Scraping page {page}")
-
-            # Wait for the table to load
             WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.TAG_NAME, "table")))
 
-            # Scrape the current page
             page_data = scrape_page(driver)
             all_data.extend(page_data)
-
-            # Try to click the "Next" button
             try:
                 next_button = WebDriverWait(driver, 10).until(
-                    EC.element_to_be_clickable(
+                    EC.presence_of_element_located(
                         (By.CSS_SELECTOR, "a.paginate_button.next"))
                 )
+
+                # Check if the button is disabled
+                if "disabled" in next_button.get_attribute("class"):
+                    print("Next button is disabled. Stopping the loop.")
+                    break
+
                 next_button.click()
                 page += 1
                 time.sleep(2)  # Wait for the page to load
@@ -93,21 +92,15 @@ def main():
 
     # Convert to DataFrame
     df = pd.DataFrame(all_data)
-
-    # Print column names to check what we actually have
     print("Columns in the DataFrame:", df.columns.tolist())
-
-    # Replace empty strings with NaN for proper handling in DataFrame
     df.replace("", np.nan, inplace=True)
 
-    # Check if 'Reported' column exists before trying to convert
     if 'Reported' in df.columns:
         df['Reported'] = pd.to_numeric(df['Reported'], errors='coerce')
     else:
         print("Warning: 'Reported' column not found in the DataFrame")
 
-    # Save to CSV
-    df.to_csv('nuforc_data_all_pages_selenium.csv', index=False)
+    df.to_csv('nufroc_data.csv', index=True)
     print("Data saved to nuforc_data_all_pages_selenium.csv")
 
 

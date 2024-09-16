@@ -104,7 +104,7 @@ def main():
         print("Warning: 'Reported' column not found in the DataFrame")
 
     # Save to CSV
-    df.to_csv('nuforc_data_all_pages.csv', index=False)
+    df.to_csv('nufroc_data.csv', index=True)
     print("Data saved to nuforc_data_all_pages.csv")
 
 
