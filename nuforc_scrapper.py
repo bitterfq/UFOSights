@@ -2,7 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, ElementClickInterceptedException
 from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
@@ -23,11 +23,10 @@ def scrape_page(driver):
     for idx, row in enumerate(soup.find_all('tr')):
         cells = row.find_all('td')
 
-        # Skip the first row
+        # Skip the first row (usually header)
         if skip_first_row and idx == 0:
             continue
 
-        # Ensure that we have enough cells
         num_cells = len(cells)
 
         # Extract data with default values for missing elements
@@ -47,7 +46,6 @@ def scrape_page(driver):
             'Explanation': clean_text(cells[9].get_text(strip=True)) if num_cells > 9 else "N/A"
         }
 
-        # Add the row to data
         data.append(row_data)
 
     return data
@@ -65,14 +63,15 @@ def main():
         while True:
             print(f"Scraping page {page}")
             WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.TAG_NAME, "table")))
+                EC.presence_of_element_located((By.TAG_NAME, "table"))
+            )
 
             page_data = scrape_page(driver)
             all_data.extend(page_data)
+
             try:
                 next_button = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located(
-                        (By.CSS_SELECTOR, "a.paginate_button.next"))
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "a.paginate_button.next"))
                 )
 
                 # Check if the button is disabled
@@ -80,9 +79,18 @@ def main():
                     print("Next button is disabled. Stopping the loop.")
                     break
 
-                next_button.click()
+                try:
+                    # First, scroll the button into view
+                    driver.execute_script("arguments[0].scrollIntoView(true);", next_button)
+                    time.sleep(1)  # Allow time for any animations or layout shifts
+                    next_button.click()
+                except ElementClickInterceptedException:
+                    print("Normal click intercepted, using JavaScript click...")
+                    driver.execute_script("arguments[0].click();", next_button)
+
                 page += 1
-                time.sleep(2)  # Wait for the page to load
+                time.sleep(2)  # Wait for the page to load after clicking
+
             except (TimeoutException, NoSuchElementException):
                 print("Reached the last page or couldn't find the 'Next' button.")
                 break
@@ -90,7 +98,7 @@ def main():
     finally:
         driver.quit()
 
-    # Convert to DataFrame
+    # Convert to DataFrame and save the data
     df = pd.DataFrame(all_data)
     print("Columns in the DataFrame:", df.columns.tolist())
     df.replace("", np.nan, inplace=True)
@@ -101,7 +109,7 @@ def main():
         print("Warning: 'Reported' column not found in the DataFrame")
 
     df.to_csv('nuforc_data.csv')
-    print("Data saved to nuforc_data_all_pages_selenium.csv")
+    print("Data saved to nufroc_data.csv")
 
 
 if __name__ == "__main__":
